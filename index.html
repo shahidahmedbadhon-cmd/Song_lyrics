@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Lyrics Song</title>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #14001f, #31004a, #09000d);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+
+.container {
+  width: 90%;
+  max-width: 500px;
+  text-align: center;
+}
+
+#lyrics {
+  min-height: 120px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.line {
+  color: white;
+  font-size: 25px;
+  font-weight: bold;
+  line-height: 1.5;
+  text-shadow: 0 0 15px rgba(255,255,255,.7);
+  animation: show .7s ease;
+}
+
+@keyframes show {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+button {
+  margin-top: 30px;
+  padding: 13px 30px;
+  border: none;
+  border-radius: 30px;
+  background: white;
+  color: #31004a;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div id="lyrics">
+    <div class="line">Press Play 🎵</div>
+  </div>
+
+  <audio id="song">
+    <source src="song.mp3" type="audio/mpeg">
+  </audio>
+
+  <button onclick="toggleSong()" id="playBtn">
+    ▶ Play Song
+  </button>
+
+</div>
+
+<script>
+
+const song = document.getElementById("song");
+const lyricsBox = document.getElementById("lyrics");
+const playBtn = document.getElementById("playBtn");
+
+/*
+   Lyrics timing
+   শেষ lyric "oonchi oonchi"
+   শেষ হওয়ার পর গান বন্ধ হবে।
+*/
+
+const lyrics = [
+  { time: 0.0, text: "laal joda pahne aana" },
+  { time: 3.0, text: "haath mehndi wale Laana" },
+  { time: 6.0, text: "rachayege sang milke" },
+
+  { time: 10.0, text: "saath kangan leke aana" },
+  { time: 13.0, text: "woh bandhan leke aana" },
+  { time: 16.0, text: "nibhayege sang milke.." },
+
+  { time: 20.0, text: "oonchi oonchi" }
+];
+
+let currentLine = -1;
+
+function toggleSong() {
+
+  if (song.paused) {
+    song.play();
+    playBtn.innerHTML = "⏸ Pause";
+  } else {
+    song.pause();
+    playBtn.innerHTML = "▶ Play Song";
+  }
+
+}
+
+song.addEventListener("timeupdate", () => {
+
+  const currentTime = song.currentTime;
+
+  for (let i = lyrics.length - 1; i >= 0; i--) {
+
+    if (currentTime >= lyrics[i].time) {
+
+      if (currentLine !== i) {
+
+        currentLine = i;
+
+        lyricsBox.innerHTML =
+          `<div class="line">${lyrics[i].text}</div>`;
+
+      }
+
+      break;
+    }
+  }
+
+  /*
+    "oonchi oonchi" শুরু হওয়ার পর
+    3 সেকেন্ড বাজিয়ে গান বন্ধ হবে।
+  */
+
+  const lastLyricTime = lyrics[lyrics.length - 1].time;
+
+  if (currentTime >= lastLyricTime + 3) {
+
+    song.pause();
+    song.currentTime = 0;
+
+    currentLine = -1;
+
+    lyricsBox.innerHTML =
+      `<div class="line">✨</div>`;
+
+    playBtn.innerHTML = "▶ Play Song";
+  }
+
+});
+
+song.addEventListener("ended", () => {
+
+  song.currentTime = 0;
+  currentLine = -1;
+
+  lyricsBox.innerHTML =
+    `<div class="line">✨</div>`;
+
+  playBtn.innerHTML = "▶ Play Song";
+
+});
+
+</script>
+
+</body>
+</html>
